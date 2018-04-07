@@ -41,7 +41,7 @@ public class NoteLevel implements Level {
     int nbnotesunder; // number of notes under basenote
     int nbnotesupper;// number of notes upper basenote
 
-    ArrayList<Integer> pitcheslist; //list of pitch for custom
+    ArrayList<PitchDef> pitcheslist; //list of pitch for custom
 
     /* For chord game only */ String chordtype;
 
@@ -67,7 +67,7 @@ public class NoteLevel implements Level {
 
         this.chordtype = "root";
         this.intervaltype = "third";
-        this.pitcheslist = new ArrayList<Integer>();
+        this.pitcheslist = new ArrayList<PitchDef>();
 
     }
 
@@ -100,7 +100,7 @@ public class NoteLevel implements Level {
         this.chordtype = "root";
         this.intervaltype = "third";
 
-        this.pitcheslist = new ArrayList<Integer>();
+        this.pitcheslist = new ArrayList<PitchDef>();
 
     }
 
@@ -210,29 +210,29 @@ public class NoteLevel implements Level {
 
     /*****************************************/
 
-    public ArrayList<Integer> getPitcheslist() {
+    public ArrayList<PitchDef> getPitcheslist() {
         return this.pitcheslist;
     }
 
-    public void setPitcheslist(ArrayList<Integer> l) {
-        this.pitcheslist = new ArrayList<Integer>();
+    public void setPitcheslist(ArrayList<PitchDef> l) {
+        this.pitcheslist = new ArrayList<PitchDef>();
         this.pitcheslist.addAll(l);
     }
 
     public void resetPitcheslist() {
-        this.pitcheslist = new ArrayList<Integer>();
+        this.pitcheslist = new ArrayList<PitchDef>();
     }
 
     /*****************************************/
 
-    public Integer getRandomPitch() {
+    public PitchDef getRandomPitch() {
 
         Random generator = new Random();
         int index = generator.nextInt(this.pitcheslist.size());
         if (index > -1) {
             return (this.pitcheslist.get(index));
         } else {
-            return 0;
+            return new PitchDef(0);
         }
     }
 
@@ -370,7 +370,7 @@ public class NoteLevel implements Level {
         this.chordtype = nl.chordtype;
         this.intervaltype = nl.intervaltype;
 
-        this.pitcheslist = new ArrayList<Integer>();
+        this.pitcheslist = new ArrayList<PitchDef>();
         this.pitcheslist.addAll(nl.getPitcheslist());
 
     }
@@ -445,8 +445,8 @@ public class NoteLevel implements Level {
             }
             if (this.isCustomNotesgame()) {
                 fileContent.append("<pitches>");
-                for (Integer pitch : this.pitcheslist) {
-                    fileContent.append(pitch + ",");
+                for (PitchDef pitch : this.pitcheslist) {
+                    fileContent.append(pitch.toString() + ",");
                 }
                 fileContent.append("</pitches>" + newline);
             }

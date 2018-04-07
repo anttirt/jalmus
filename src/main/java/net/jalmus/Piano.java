@@ -163,7 +163,7 @@ public class Piano {
      */
 
     public void paint(Graphics g, int width, boolean paintbutton, int basenotepitch1, int basenotepitch2, int basenotepitchb1, int basenotepitchb2, int pitchcourant0,
-            int pitchcourant1, int pitchcourant2, boolean iscustom, ArrayList<Integer> pitchesl) {
+            int pitchcourant1, int pitchcourant2, boolean iscustom, ArrayList<PitchDef> pitchesl) {
         Graphics2D g2 = (Graphics2D)g;
         //  Dimension d = getSize();
 
@@ -215,8 +215,8 @@ public class Piano {
                 g2.setColor(cg);
                 g2.fill(key);
             } else if (iscustom && paintbutton) {
-                for (Integer pitch : pitchesl) {
-                    if (key.kNum == pitch) {
+                for (PitchDef pitch : pitchesl) {
+                    if (key.kNum == pitch.pitch) {
                         g2.setColor(cg);
                         g2.fill(key);
                     }
@@ -260,8 +260,8 @@ public class Piano {
             }
 
             if (iscustom && paintbutton) {
-                for (Integer pitch : pitchesl) {
-                    if (key.kNum == pitch) {
+                for (PitchDef pitch : pitchesl) {
+                    if (key.kNum == pitch.pitch) {
                         g2.setColor(cg);
                         g2.fill(key);
                         g2.setColor(Color.black);

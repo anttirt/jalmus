@@ -744,30 +744,30 @@ public class Lessons extends DefaultHandler {
 
             String temp = buffer.toString();
             StringTokenizer st = new StringTokenizer(temp, ",;");
-            ArrayList<Integer> pitcheslist = new ArrayList<Integer>();
-            Integer p;
+            ArrayList<PitchDef> pitcheslist = new ArrayList<PitchDef>();
+            PitchDef p;
 
             switch (leveltype) {
             case NOTELEVEL:
 
                 while (st.hasMoreTokens()) {
                     // System.out.println(p);
-                    p = Integer.parseInt(st.nextToken());
+                    p = PitchDef.parse(st.nextToken());
                     System.out.println(p);
                     if (nlevel.isCurrentKeyTreble()) {
-                        if (p >= 47 & p <= 96) {
+                        if (p.pitch >= 47 & p.pitch <= 96) {
                             pitcheslist.add(p);
                         } else {
                             throw new SAXException("In level " + nlevel.getId() + " pitches should be list pitch 47 to 96");
                         }
                     } else if (nlevel.isCurrentKeyBass()) {
-                        if (p >= 26 & p <= 74) {
+                        if (p.pitch >= 26 & p.pitch <= 74) {
                             pitcheslist.add(p);
                         } else {
                             throw new SAXException("In level " + nlevel.getId() + " pitches should be list pitch 26 to 74");
                         }
                     } else if (nlevel.isCurrentKeyBoth()) {
-                        if (p >= 26 & p <= 96) {
+                        if (p.pitch >= 26 & p.pitch <= 96) {
                             pitcheslist.add(p);
                         } else {
                             throw new SAXException("In level " + nlevel.getId() + " pitches should be list pitch 26 to 96");
@@ -784,16 +784,16 @@ public class Lessons extends DefaultHandler {
             case SCORELEVEL: //to do
                 while (st.hasMoreTokens()) {
                     // System.out.println(p);
-                    p = Integer.parseInt(st.nextToken());
+                    p = PitchDef.parse(st.nextToken());
                     System.out.println(p);
                     if (slevel.isCurrentKeyTreble()) {
-                        if (p >= 55 & p <= 84) {
+                        if (p.pitch >= 55 & p.pitch <= 84) {
                             pitcheslist.add(p); //SOL DO
                         } else {
                             throw new SAXException("In level " + slevel.getId() + " pitches should be list pitch 55 to 84");
                         }
                     } else if (slevel.isCurrentKeyBass()) {
-                        if (p >= 35 & p <= 64) {
+                        if (p.pitch >= 35 & p.pitch <= 64) {
                             pitcheslist.add(p); //E-2 E0
                         } else {
                             throw new SAXException("In level " + slevel.getId() + " pitches should be list pitch 35 to 64");

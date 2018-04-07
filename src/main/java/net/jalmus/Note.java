@@ -19,6 +19,7 @@ public class Note {
     int Height;
     int X; // x position for animation
     int Pitch; // midi pitch
+    Clef Clef;
 
     public Note(String alt, String nom, int h, int x, int p) {
         this.Alteration = alt;
@@ -26,6 +27,16 @@ public class Note {
         this.Height = h; // pos. de la note dportee+20 = sol cle de sol, dportee+24 = fa (+4)
         this.X = x;
         this.Pitch = p;
+        this.Clef = null;
+    }
+
+    public Note(String alt, String nom, int x, PitchDef p) {
+        this.Alteration = alt;
+        this.Nom = nom;
+        this.Height = 0; // pos. de la note dportee+20 = sol cle de sol, dportee+24 = fa (+4)
+        this.X = x;
+        this.Pitch = p.pitch;
+        this.Clef = p.clef;
     }
 
     public void init() {
@@ -34,6 +45,7 @@ public class Note {
         this.Height = 0; // pos. de la note dportee+20 = sol cle de sol, dportee+24 = fa (+4)
         this.X = 0;
         this.Pitch = 0;
+        this.Clef = null;
     }
 
     public void copy(Note n) {
@@ -42,6 +54,7 @@ public class Note {
         this.Height = n.Height; // pos. de la note dportee+20 = sol cle de sol, dportee+24 = fa (+4)
         this.X = n.X;
         this.Pitch = n.Pitch;
+        this.Clef = n.Clef;
     }
 
     public String getNom() {
@@ -60,6 +73,11 @@ public class Note {
         this.Pitch = i;
     }
 
+    public void setPitch(PitchDef p) {
+        this.Pitch = p.pitch;
+        this.Clef = p.clef;
+    }
+
     public int getX() {
         return this.X;
     }
@@ -74,6 +92,28 @@ public class Note {
 
     public void setHeight(int h) {
         this.Height = h;
+    }
+
+    private Clef getActualClef(NoteLevel nrlevel) {
+        Clef actualClef;
+        if(nrlevel.isCurrentKeyTreble()) {
+            actualClef = Clef.TREBLE;
+        }
+        else if(nrlevel.isCurrentKeyBass()) {
+            actualClef = Clef.BASS;
+        }
+        else {
+            if(this.Clef != null) {
+                actualClef = this.Clef;
+            }
+            else if(this.Pitch >= 57) {
+                actualClef = Clef.TREBLE;
+            }
+            else {
+                actualClef = Clef.BASS;
+            }
+        }
+        return actualClef;
     }
 
     public void paint(NoteLevel nrlevel, Graphics g, Font f, int decalagea, int decalagen, int dportee, Component j, Color couleur, ResourceBundle b) {
@@ -146,12 +186,16 @@ public class Note {
 
         else if (nrlevel.isCurrentKeyBoth()) {
 
+            Clef clef = getActualClef(nrlevel);
+
             // cas de la cl� de sol
-            if (this.Height >= dportee + 45 & this.Height <= dportee + 55) { // du DO jusqu'au LA en dessous de la port�e
+            if (this.Height >= dportee + 45 & (this.Height <= dportee + 55 || clef == Clef.TREBLE)) { // du DO jusqu'au LA en dessous de la port�e
+                // below treble
                 for (i = dportee + 50; i <= this.Height + 5; i = i + 10) {
                     g.drawLine(this.X - 2 + decalagen, i, this.X + 18 + decalagen, i);
                 }       // dessine la port�e en dessous de la port�e normale
             } else if (this.Height <= dportee - 15) {  // <LA au dessus de la port�e en cl� de sol
+                // above treble
                 for (i = dportee - 10; i >= this.Height + 5; i = i - 10) {
                     g.drawLine(this.X - 2 + decalagen, i, this.X + 18 + decalagen, i);
                 }       // dessine la portee en dessus de la port�e normale
@@ -159,10 +203,12 @@ public class Note {
 
             // cas de la cl� de fa
             else if (this.Height >= dportee + 135) {  // � partie du MI en dessous de la port�e
+                // below bass
                 for (i = dportee + 140; i <= this.Height + 5; i = i + 10) {
                     g.drawLine(this.X - 2 + decalagen, i, this.X + 18 + decalagen, i);
                 }       // dessine la port�e en dessous de la port�e normale
-            } else if (this.Height <= dportee + 75 & this.Height >= dportee + 60) {
+            } else if (this.Height <= dportee + 75 & (this.Height >= dportee + 60 || clef == Clef.BASS)) {
+                // above bass
                 for (i = dportee + 80; i >= this.Height + 5; i = i - 10) {
                     g.drawLine(this.X - 2 + decalagen, i, this.X + 18 + decalagen, i);
                 }      // dessine la portee en dessus de la port�e normale
@@ -497,7 +543,9 @@ public class Note {
             heigth2staff = 0;
         }
 
-        if (nrlevel.isCurrentKeyTreble() || (nrlevel.isCurrentKeyBoth() & this.Pitch >= 57)) {//base cl� de sol : SOL = dportee+25
+        Clef actualClef = getActualClef(nrlevel);
+
+        if (actualClef == Clef.TREBLE) {//base cl� de sol : SOL = dportee+25
 
             if (this.samenotePitch(0)) {
                 this.Nom = DO;
@@ -645,9 +693,11 @@ public class Note {
                 } else {
                     this.Alteration = "";
                 }
+            } else {
+                System.out.println("oh no");
             }
 
-        } else if (nrlevel.isCurrentKeyBass() || (nrlevel.isCurrentKeyBoth() & this.Pitch < 57)) {
+        } else {
 
             if (this.samenotePitch(0)) {
                 this.Nom = DO;
@@ -795,6 +845,8 @@ public class Note {
                 } else {
                     this.Alteration = "";
                 }
+            } else {
+                System.out.println("oh no");
             }
 
         }

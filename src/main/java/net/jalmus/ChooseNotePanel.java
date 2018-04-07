@@ -89,31 +89,31 @@ public class ChooseNotePanel extends JPanel {
         return this.okButton;
     }
 
-    public ArrayList<Integer> getPitches() {
-        ArrayList<Integer> pitchselected = new ArrayList<Integer>();
+    public ArrayList<PitchDef> getPitches() {
+        ArrayList<PitchDef> pitchselected = new ArrayList<PitchDef>();
 
         int numRows = table.getRowCount();
         int numCols = table.getColumnCount();
         for (int i = 0; i < numRows; i++) {
             for (int j = 1; j < numCols; j++) {
                 if ((Boolean)table.getValueAt(i, j)) {
-                    pitchselected.add(24 + 12 * i + (j - 1)); // first note Octava -3 C pitch 24
+                    pitchselected.add(new PitchDef(24 + 12 * i + (j - 1))); // first note Octava -3 C pitch 24
                 }
             }
         }
         return pitchselected;
     }
 
-    public void updateTable(ArrayList<Integer> pitcheslist) {
+    public void updateTable(ArrayList<PitchDef> pitcheslist) {
         int tmp = 0;
-        for (Integer pitch : pitcheslist) {
+        for (PitchDef pitch : pitcheslist) {
             //to do
             int numRows = table.getRowCount();
             int numCols = table.getColumnCount();
             for (int i = 0; i < numRows; i++) {
                 for (int j = 1; j < numCols; j++) {
                     tmp = 24 + 12 * i + (j - 1);
-                    if (tmp == pitch) {
+                    if (tmp == pitch.pitch) {
                         table.setValueAt(true, i, j);
                         //System.out.println("i: "+i+" j: "+j );
                     }

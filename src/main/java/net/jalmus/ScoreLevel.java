@@ -32,7 +32,7 @@ public class ScoreLevel implements Level {
     boolean metronome;
     boolean beats;
     //int[] pitchtab = new int [8];
-    ArrayList<Integer> pitcheslist = new ArrayList<Integer>();
+    ArrayList<PitchDef> pitcheslist = new ArrayList<PitchDef>();
 
     /*                          C3  D3  E3  F3  G3  A3  B3  */
   /*                         ---------------------------- */ char[][] sharpsMatrix = {{60, 62, 64, 65, 67, 69, 71}, {0, 0, 0, 1, 0, 0, 0}, // 1 alteration
@@ -66,7 +66,7 @@ public class ScoreLevel implements Level {
         this.currentKey = "treble";
         this.randomtonality = false;
         this.currenttonality = new Tonality(0, "");
-        this.pitcheslist = new ArrayList<Integer>();
+        this.pitcheslist = new ArrayList<PitchDef>();
         this.notetype = "notes";
         this.nbnotes = 9;
         this.timeSignNumerator = 4;
@@ -189,7 +189,7 @@ public class ScoreLevel implements Level {
 
         this.nbnotes = n.nbnotes;
 
-        this.pitcheslist = new ArrayList<Integer>();
+        this.pitcheslist = new ArrayList<PitchDef>();
         this.pitcheslist.addAll(n.pitcheslist);
 
     }
@@ -203,14 +203,14 @@ public class ScoreLevel implements Level {
         this.triplet = t;
     }
 
-    public ArrayList<Integer> getPitcheslist() {
+    public ArrayList<PitchDef> getPitcheslist() {
         return this.pitcheslist;
     }
 
     /********************************/
 
-    public void setPitcheslist(ArrayList<Integer> l) {
-        this.pitcheslist = new ArrayList<Integer>();
+    public void setPitcheslist(ArrayList<PitchDef> l) {
+        this.pitcheslist = new ArrayList<PitchDef>();
         this.pitcheslist.addAll(l);
     }
 
@@ -274,7 +274,7 @@ public class ScoreLevel implements Level {
                 alteration = 0 - flatsMatrix[altIndex][noteIdx];
             }
 
-            pitcheslist.add(sharpsMatrix[0][noteIdx] + (octaveOffset * 12) + alteration);
+            pitcheslist.add(new PitchDef(sharpsMatrix[0][noteIdx] + (octaveOffset * 12) + alteration));
 
             if (noteIdx == 6) {
                 octaveOffset++;
@@ -288,7 +288,7 @@ public class ScoreLevel implements Level {
         //	  System.out.println("pitchtab #" + i + ": " + pitcheslist.get(i));
     }
 
-    public int getRandomPitch() {
+    public PitchDef getRandomPitch() {
         int pitch = 71;
 
 //	pitch =  pitcheslist.get((int) (pitcheslist.size() * Math.random()));
@@ -298,20 +298,19 @@ public class ScoreLevel implements Level {
         if (index > -1) {
             return (this.pitcheslist.get(index));
         } else {
-            return 0;
+            return new PitchDef(0);
         }
 
         //System.out.println("New random pitch = " + pitch);
 
     }
 
-    public int tripletRandomPitch(int basePitch) {
+    public PitchDef tripletRandomPitch(int basePitch) {
         int baseIndex = 0;
         int delta = 4; // within +2 and -2 tones from basePitch
         int shift = -2;
-        int pitch = 0;
         for (int i = 0; i < pitcheslist.size(); i++) {
-            if (pitcheslist.get(i) == basePitch) {
+            if (pitcheslist.get(i).pitch == basePitch) {
                 baseIndex = i;
                 break;
             }
@@ -333,8 +332,7 @@ public class ScoreLevel implements Level {
         int randIndex = baseIndex + shift + (int)(Math.random() * delta);
         System.out.println("Triplet: base: " + basePitch + ", baseIndex: " + baseIndex + ", randIdx: " + randIndex);
 
-        pitch = pitcheslist.get(randIndex);
-        return pitch;
+        return pitcheslist.get(randIndex);
     }
 
     public void updateRhythm(boolean r, boolean b, boolean bp, boolean n, boolean c, boolean s, boolean t) {
@@ -567,8 +565,8 @@ public class ScoreLevel implements Level {
             }
             if (this.isCustomNotes()) {
                 fileContent.append("<pitches>");
-                for (Integer pitch : this.pitcheslist) {
-                    fileContent.append(pitch + ",");
+                for (PitchDef pitch : this.pitcheslist) {
+                    fileContent.append(pitch.toString() + ",");
                 }
                 fileContent.append("</pitches>" + newline);
             }

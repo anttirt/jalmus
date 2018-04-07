@@ -1260,7 +1260,7 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
 
             }
         } else {
-            System.err.println(sousrepertoire + " : Reading lessons files error.");
+            System.err.println(sousrepertoire + " : Reading lessons files error (" + path + " is not a directory).");
         }
 
         lessonsMenu.addSeparator();
@@ -4868,7 +4868,8 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
         }
     }
 
-    private int addRhythm(double duration, int pitch, boolean stemup, int currentTick, int row, int newXPos) {
+    private int addRhythm(double duration, PitchDef pitch_, boolean stemup, int currentTick, int row, int newXPos) {
+        int pitch = pitch_.pitch; // TODO do we need pitch_.clef here?
         int tick = currentTick;
         int velocity = 71;
         boolean silence = false;
@@ -4965,7 +4966,7 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
         int rowCount = 0; // measures counter
         double tpsmes = 0; // number of quarters
         int currentXPos = windowMargin + keyWidth + alterationWidth + timeSignWidth + notesShift;
-        int pitch;
+        PitchDef pitch;
         boolean wholeNote = false, halfNote = false, dottedhalfNote = false, quarterNote = false, eighthNote = false, triplet = false;
         boolean stemup = true;
         getSize();
@@ -5035,17 +5036,17 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
                 //System.out.println("tpsmes : " + tpsmes);
                 double tmp = Math.random();
                 if (selectedGame == RHYTHMREADING) {
-                    pitch = 71;
+                    pitch = new PitchDef(71);
                     stemup = true;
                 } else {
                     pitch = scoreLevel.getRandomPitch();
-                    if (scoreLevel.isCurrentKeyTreble() && pitch >= 71) {
+                    if (scoreLevel.isCurrentKeyTreble() && pitch.pitch >= 71) {
                         stemup = false; //SI
-                    } else if (scoreLevel.isCurrentKeyTreble() && pitch < 71) {
+                    } else if (scoreLevel.isCurrentKeyTreble() && pitch.pitch < 71) {
                         stemup = true;
-                    } else if (scoreLevel.isCurrentKeyBass() && pitch >= 50) {
+                    } else if (scoreLevel.isCurrentKeyBass() && pitch.pitch >= 50) {
                         stemup = false; //RE
-                    } else if (scoreLevel.isCurrentKeyBass() && pitch < 50) {
+                    } else if (scoreLevel.isCurrentKeyBass() && pitch.pitch < 50) {
                         stemup = true;
                     }
                     // it will be better to use noteY than pitch
@@ -5072,17 +5073,17 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
                     currentTick = addRhythm(0.5, pitch, stemup, currentTick, rowCount, currentXPos);
                     currentXPos += (noteDistance / 2);
                 } else if (triplet && tpsmes + 1 <= tmpnum && tmp < 0.9) { // triplet
-                    int[] tripletPitches = {pitch, 71, 71};
-                    int lowestPitch = tripletPitches[0];
+                    PitchDef[] tripletPitches = {pitch, new PitchDef(71), new PitchDef(71)};
+                    int lowestPitch = tripletPitches[0].pitch;
                     if (selectedGame == SCOREREADING) {
-                        tripletPitches[1] = scoreLevel.tripletRandomPitch(tripletPitches[0]);
-                        tripletPitches[2] = scoreLevel.tripletRandomPitch(tripletPitches[0]);
+                        tripletPitches[1] = scoreLevel.tripletRandomPitch(tripletPitches[0].pitch);
+                        tripletPitches[2] = scoreLevel.tripletRandomPitch(tripletPitches[0].pitch);
                     }
                     for (int i = 1; i < 3; i++) {
-                        if (tripletPitches[i] < lowestPitch && !stemup) {
-                            lowestPitch = tripletPitches[i];
-                        } else if (tripletPitches[i] > lowestPitch && stemup) {
-                            lowestPitch = tripletPitches[i];
+                        if (tripletPitches[i].pitch < lowestPitch && !stemup) {
+                            lowestPitch = tripletPitches[i].pitch;
+                        } else if (tripletPitches[i].pitch > lowestPitch && stemup) {
+                            lowestPitch = tripletPitches[i].pitch;
                         }
                     }
 
@@ -5160,17 +5161,17 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
             }
         } else if (noteLevel.isCustomNotesgame()) {
 
-            ligne[0] = new Note("", "", 0, size.width - notemargin, noteLevel.getRandomPitch());
+            ligne[0] = new Note("", "", size.width - notemargin, noteLevel.getRandomPitch());
             ligne[0].updateNotePitch(noteLevel, scoreYpos, bundle);
 
             String tmpa = "";
             for (int i = 1; i < ligne.length; i++) {
-                int tmpp = noteLevel.getRandomPitch();
-                while (tmpp == ligne[i - 1].getPitch()) {
+                PitchDef tmpp = noteLevel.getRandomPitch();
+                while (tmpp.equals(ligne[i - 1].getPitch())) {
                     tmpp = noteLevel.getRandomPitch(); // to avoid same pitch
                 }
 
-                ligne[i] = new Note(tmpa, "", 0, size.width - notemargin + i * 35, tmpp);
+                ligne[i] = new Note(tmpa, "", size.width - notemargin + i * 35, tmpp);
                 ligne[i].updateNotePitch(noteLevel, scoreYpos, bundle);
 
             }
@@ -5699,6 +5700,8 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
 
         }
 
+		private String lastoutput = "";
+
         @Override
         public void send(MidiMessage event, long time) {
 
@@ -5811,6 +5814,10 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
                         break;
                     case 0xe0:
                         output = ("   Pitch lsb: " + ((ShortMessage)event).getData1() + " msb: " + ((ShortMessage)event).getData2());
+						if(output.equals(lastoutput))
+						{
+							output = "";
+						}
                         break;
                     case 0xc0:
                         output = ("   Program Change No: " + ((ShortMessage)event).getData1() + " Just for Test: " + ((ShortMessage)event).getData2());
@@ -5830,6 +5837,7 @@ public class Jalmus extends JFrame implements KeyListener, ActionListener, ItemL
                 }
                 if (output != "") {
                     System.out.println(output);
+					lastoutput = output;
                 }
             }
         }
